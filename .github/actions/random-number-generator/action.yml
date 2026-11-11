@@ -1,0 +1,57 @@
+# Sets the name shown for this GitHub Action.
+name: 'Random Number Generator'
+# Describes what the action does.
+description: 'Greets a user and generates a random number'
+
+# Lists the values a caller can provide to this action.
+inputs:
+  # Names the input that holds the user's name.
+  user-name:
+    # Explains what value the caller should provide.
+    description: 'The name of the user to greet'
+    # Requires the caller to provide this input.
+    required: true
+    # Uses this name if the caller does not provide a value.
+    default: 'Developer'
+
+# Lists the values this action returns to its caller.
+outputs:
+  # Names the output containing the generated number.
+  generated-number:
+    # Explains what value this output contains.
+    description: 'The generated pseudo-random number'
+    # Copies the random-id output from the step whose ID is rng-step.
+    value: ${{ steps.rng-step.outputs.random-id }}
+
+# Configures how the action runs.
+runs:
+  # Combines multiple workflow steps into one action.
+  using: 'composite'
+  # Lists the steps that run when someone uses this action.
+  steps:
+    # Names the step that greets the user.
+    - name: Greet User
+      # Runs this step's commands with the Bash shell.
+      shell: bash
+      # Passes the input as an environment variable instead of shell code.
+      env:
+        USER_NAME: ${{ inputs.user-name }}
+      # Starts the shell commands for this step.
+      run: |
+        # Prints a greeting using the provided user-name input.
+        echo "Hello, $USER_NAME!"
+
+    # Names the step that creates a random number.
+    - name: Generate Random Number
+      # Gives this step an ID used by the output mapping above.
+      id: rng-step
+      # Runs this step's commands with the Bash shell.
+      shell: bash
+      # Starts the shell commands for this step.
+      run: |
+        # Stores Bash's pseudo-random integer (from 0 through 32767) in RAND_VAL.
+        RAND_VAL=$RANDOM
+        # Prints the generated number in the step log.
+        echo "Internal step generated: $RAND_VAL"
+        # Saves the value as a step output so the action can return it to its caller.
+        echo "random-id=$RAND_VAL" >> "$GITHUB_OUTPUT"

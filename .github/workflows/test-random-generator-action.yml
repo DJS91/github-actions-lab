@@ -1,0 +1,49 @@
+# Names this workflow in the GitHub Actions tab.
+name: Test Random Number Generator Action
+
+# Defines the events that start this workflow.
+on:
+  # Runs when a pushed commit changes the action or this workflow.
+  push:
+    paths:
+      - '.github/actions/random-number-generator/**'
+      - '.github/workflows/test-random-generator-action.yml'
+  # Runs when a pull request changes the action or this workflow.
+  pull_request:
+    paths:
+      - '.github/actions/random-number-generator/**'
+      - '.github/workflows/test-random-generator-action.yml'
+  # Allows a user to start the workflow manually from GitHub.
+  workflow_dispatch:
+
+# Defines the jobs that this workflow runs.
+jobs:
+  # Defines the job that checks the random number action.
+  test:
+    # Runs the job on a GitHub-hosted Ubuntu machine.
+    runs-on: ubuntu-latest
+    # Lists the steps that run in this job.
+    steps:
+      # Checks out the repository so the local action is available.
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Runs the local action with a sample name.
+      - name: Run random number generator action
+        id: generator
+        uses: ./.github/actions/random-number-generator
+        with:
+          user-name: GitHub Actions
+
+      # Checks that the action returned a number and prints it.
+      - name: Verify generated number
+        env:
+          GENERATED_NUMBER: ${{ steps.generator.outputs.generated-number }}
+        run: |
+          # Fails the workflow if the output is missing or is not made of digits.
+          if [[ ! "$GENERATED_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::The action did not return a valid number."
+            exit 1
+          fi
+          # Prints the valid number returned by the action.
+          echo "The action returned: $GENERATED_NUMBER"

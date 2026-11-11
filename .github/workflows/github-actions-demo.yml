@@ -1,27 +1,48 @@
+# Sets the name shown for this workflow in GitHub Actions.
 name: GitHub Actions Demo
 
+# Starts the list of events that can start this workflow.
 on:
+  # Runs when a commit is pushed.
   push:
-    branches: [ main ]
-    paths-ignore: [.github/**]
+    # Limits push-triggered runs to changes on the main branch.
+    branches: [ main ] # Only run for pushes to main.
+    # Skips a push run when all changed files are inside the .github folder.
+    paths-ignore: [.github/**] # Skip if all changed paths are under .github.
+  # Runs when a pull request targets the main branch.
   pull_request:
-    branches: [ main ]
+    branches: [ main ] # Only run for pull requests targeting main.
+  # Runs automatically every Sunday at 06:15 UTC.
   schedule:
-    - cron: '15 6 * * 0'
+    - cron: '15 6 * * 0' # Uses minute hour day-of-month month day-of-week fields.
+  # Also allows a person to start the workflow manually in GitHub.
   workflow_dispatch:
 
+# Starts the list of jobs this workflow will run.
 jobs:
+  # Defines a job with the identifier "build".
   build:
+    # Gives the job the display name "Build".
     name: Build
+    # Runs the job on a GitHub-hosted Ubuntu 22.04 virtual machine.
     runs-on: ubuntu-22.04
+    # Starts the ordered list of steps in this job.
     steps:
+      # Runs the following shell commands as one step.
       - run: |
-          echo "🎉 The job was triggered by event: ${{ github.event_name }}"
-          echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ."
+          # Prints which GitHub event started the workflow; GitHub fills in the event name.
+          echo "🎉 The job was triggered by event: ${{ github.event_name }}" # Writes the triggering event name to the log.
+          # Prints the branch or ref used for this run; the repository sentence ends with hard-coded text ".".
+          echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ." # Writes the ref and literal period to the log.
 
+      # Runs GitHub's checkout action to download the repository files onto the runner.
       - uses: actions/checkout@v3.3.0
 
+      # Gives the next step a descriptive name in the workflow log.
       - name: List files in the repository
+        # Runs the following shell commands as this named step.
         run: |
-          echo "The repository ${{ github.repository }} contains the following files:"
-          tree
+          # Prints the repository name and a short introduction; GitHub fills in the repository value.
+          echo "The repository ${{ github.repository }} contains the following files:" # Writes the repository name and introduction to the log.
+          # Displays repository files as a directory tree.
+          tree # Prints the directory and file hierarchy.
